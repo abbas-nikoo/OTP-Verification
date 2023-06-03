@@ -62,12 +62,6 @@ class Home(APIView):
         return Response("ok", status=status.HTTP_200_OK)
 
 
-# class PostRetrivView(APIView):
-#     def get(self, request):
-#         queryset = PostModel.objects.all()
-#         serializer = PostSerializers(instance=queryset, many=True)
-#         return Response(serializer.data, status=status.HTTP_200_OK)
-
 class PostRetrivView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -76,8 +70,6 @@ class PostRetrivView(APIView):
             queryset = PostModel.objects.get(slug=slug_id)
         except:
             return Response(status=status.HTTP_404_NOT_FOUND)
-            # serializer = PostSerializers(instance=queryset)
-            # return Response(serializer.data, status=status.HTTP_200_OK)
         response_data = {
             "id": queryset.id,
             "user": queryset.owner.username,
@@ -135,23 +127,3 @@ class PostDeleteView(APIView):
         queryset = PostModel.objects.get(slug=slug_id)
         queryset.delete()
         return Response({'message': 'delete'}, status=status.HTTP_200_OK)
-
-####################################################################################
-        # image = serializer.validated_data['image']
-        # name = serializer.validated_data['name']
-        # price = serializer.validated_data['price']
-        # data = serializer.validated_data['data']
-        # queryset = CreateFood.objects.create(image=image, name=name, price=price, data=data)
-        # response_data = {
-        #     "id": queryset.id,
-        #     "name": queryset.name,
-        #     "slug": queryset.slug,
-        #     "price": queryset.price,
-        #     "data": queryset.data,
-        # }
-        # return Response(response_data, status=status.HTTP_200_OK)
-#######################################################
-    # def delete(self, request, pk):
-    #     queryset = CreateFood.objects.get(pk=pk)
-    #     queryset.delete()
-    #     return Response({"message": "this post has been deleted"}, status=status.HTTP_200_OK)
