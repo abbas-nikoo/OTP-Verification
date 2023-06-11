@@ -1,17 +1,34 @@
-version: "3"
 services:
   db:
+    container_name: postgres
     image: postgres
+    restart: always
     environment:
       POSTGRES_DB: postgres
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+
+    networks:
+      - main
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
   redis:
+    container_name: redis
     image: redis
+    restart: always
+    networks:
+      - main
+    ports:
+      - "6380:6379"
+
   web:
     build: .
     command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
-    container_name: app
+    container_name: web
     volumes:
       - .:/code/
     ports:
@@ -19,19 +36,48 @@ services:
     depends_on:
       - db
       - redis
-    environment:
-      - CELERY_BROKER=redis://redis:6379/0
-      - CELERY_BACKEND=redis://redis:6379/0
-    entrypoint: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    restart: always
+    networks:
+      - main
+
+  #    environment:
+#      - CELERY_BROKER=redis://redis:6379/0
+#      - CELERY_BACKEND=redis://redis:6379/0
+#    entrypoint: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
   worker:
+    container_name: celery
+    command: "celery -A accounts.tasks worker -l info"
     build: .
     volumes:
-      - .:/code
+      - .:/code/
     depends_on:
+      - web
       - db
       - redis
+    restart: always
+#    environment:
+#      - C_FORCE_ROOT="true"
+#    environment:
+#      REDIS_HOST: redis
+#      REDIS_PORT: 6380
+#      REDIS_DB: 0
+#      CELERY_BROKER: redis://localhost:6380/0
+#      CELERY_RESULT_BACKEND: redis://localhost:6380/0
+#    environment:
+#      - CELERY_BROKER=redis://redis:6380/0
+#      - CELERY_BACKEND=redis://redis:6380/0
     environment:
-      - CELERY_BROKER=redis://redis:6379/0
-      - CELERY_BACKEND=redis://redis:6379/0
-    entrypoint: |
-      sh -c "celery -A accounts.tasks worker --loglevel=info"
+       - REDIS_HOST=redis
+       - REDIS_PORT=6380
+
+    networks:
+      - main
+
+#    entrypoint: |
+#      sh -c "celery -A accounts.tasks worker --loglevel=info"
+
+networks:
+  main:
+
+volumes:
+  postgres_data:

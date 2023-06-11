@@ -14,7 +14,7 @@ from .permissions import IsOwnerOrReadeOnly
 from .models import PostModel
 from .tasks import send_sms
 
-redis_code = redis.Redis(host='localhost', port=6379, db=0, charset='utf-8', decode_responses=True)
+redis_code = redis.Redis(host='redis', port=6380, db=0, charset='utf-8', decode_responses=True)
 random_code = str(randint(100000, 999999))
 
 
