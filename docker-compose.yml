@@ -19,6 +19,9 @@ services:
   redis:
     container_name: redis
     image: redis
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6380
     restart: always
     networks:
       - main
@@ -46,7 +49,7 @@ services:
 #    entrypoint: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
   worker:
     container_name: celery
-    command: "celery -A accounts.tasks worker -l info"
+    command: sh -c "celery -A accounts.tasks worker -l info"
     build: .
     volumes:
       - .:/code/
@@ -55,8 +58,10 @@ services:
       - db
       - redis
     restart: always
-#    environment:
-#      - C_FORCE_ROOT="true"
+    environment:
+      - C_FORCE_ROOT="true"
+#      - CELERY_BROKER_URL=redis://redis:6380/0
+#      - CELERY_RESULT_BACKEND=redis://redis:6380/0
 #    environment:
 #      REDIS_HOST: redis
 #      REDIS_PORT: 6380
@@ -66,9 +71,9 @@ services:
 #    environment:
 #      - CELERY_BROKER=redis://redis:6380/0
 #      - CELERY_BACKEND=redis://redis:6380/0
-    environment:
-       - REDIS_HOST=redis
-       - REDIS_PORT=6380
+#    environment:
+#       - REDIS_HOST=redis
+#       - REDIS_PORT=6380
 
     networks:
       - main
