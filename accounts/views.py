@@ -13,8 +13,9 @@ from .serializers import UserLoginsSerializers, VerifyOtpSerializer, PostSeriali
 from .permissions import IsOwnerOrReadeOnly
 from .models import PostModel
 from .tasks import send_sms
+from .weather import get_weather_status
 
-redis_code = redis.Redis(host='redis', port=6380, db=0, charset='utf-8', decode_responses=True)
+redis_code = redis.Redis(host='redis', port=6379, db=0, charset='utf-8', decode_responses=True)
 random_code = str(randint(100000, 999999))
 
 
@@ -56,7 +57,7 @@ class UserOtpCode(APIView):
 
 
 class Home(APIView):
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
         return Response("ok", status=status.HTTP_200_OK)
@@ -127,3 +128,16 @@ class PostDeleteView(APIView):
         queryset = PostModel.objects.get(slug=slug_id)
         queryset.delete()
         return Response({'message': 'delete'}, status=status.HTTP_200_OK)
+
+
+class WeatherView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        city = request.data.get('city')  # Get the city from the request data
+        if not city:
+            return Response({'error': 'City parameter is required'}, status=400)
+
+        weather_status = get_weather_status(city)
+
+        return Response({'weather_status': weather_status})

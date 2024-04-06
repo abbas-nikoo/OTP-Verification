@@ -10,4 +10,5 @@ urlpatterns = [
     path('create/', views.PostCreateView.as_view()),
     path('update/<slug:slug_id>/', views.PostUpdateView.as_view()),
     path('delete/<slug:slug_id>/', views.PostDeleteView.as_view()),
+    path('weather/', views.WeatherView.as_view(), name='weather'),
 ]
